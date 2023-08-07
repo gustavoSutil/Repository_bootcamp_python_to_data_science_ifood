@@ -4,9 +4,7 @@
 #3 - ter um menu: d / s / e / q  adicional: ajuda
 #4 - cadastro de usuario
 #5 - cadastro de conta bancária
-# fazer como um inicante para progredir com o curso..
 
-#constantes para no caso de alteração de regras de negócio seja facil de manipular
 
 
 def main():
@@ -26,7 +24,7 @@ Menu:
                 '''
             )
             case '2' | 'Depósito':
-                #Tratamento de caso , pra .
+                #Tratamento de caso , para evitar erros
                 valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
                 if valor <= 0:
                     print("Valor inválido")
@@ -35,23 +33,7 @@ Menu:
                     print(f'Valor depositado {valor},\nSaldo atual R$ {SALDO}')
                     MOVIMENTACAO +=f'Valor depositado {valor},\nSaldo atual R$ {SALDO}\n\n'
             case '3' | 'saque':
-                if saques_no_dia > 3:
-                    #constantes para no caso de alteração de regras de negócio seja facil de manipular
-                    print(f'Valor o limite de saques, LIMITE_SAQUE são {LIMITE_DE_SAQUES}')
-                else:
-                    valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
-                    if valor <= 0:
-                        print("Valor inválido")
-                    elif (SALDO<valor):
-                        print('Saldo insuficiente!')
-                    elif ((valor+valor_sacado_no_dia)>LIMITE_SAQUE):
-                        print(f'Valor acima do limite de saque R$ {LIMITE_SAQUE:.2f}')
-                    else:
-                        SALDO-=valor
-                        print(f'Valor sacado {valor},\nSaldo atual R$ {SALDO}')
-                        saques_no_dia+=1
-                        valor_sacado_no_dia+=valor
-                        MOVIMENTACAO += f'Valor sacado {valor},\nSaldo atual R$ {SALDO}\n\n'
+                valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
             
             case '4' | 'extrato':
                 print(f'\n\n\n\n\n\nMovimentação da conta:\n{MOVIMENTACAO}\n\nSaldo atual: {SALDO:.2f}\n\nLimite: {LIMITE_SAQUE:.2f}\n\n')
