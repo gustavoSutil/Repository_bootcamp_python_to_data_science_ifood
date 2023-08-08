@@ -1,7 +1,8 @@
 import datetime
-class DateController:
-    def now():
-        moment = datetime.datetime.now()
+class DateController():
+    def registerMoment() -> datetime.datetime:
+        return datetime.datetime.now()
+    def formatedDate(moment = registerMoment()) -> str:
         dia = moment.day
         mes = moment.month
         ano = moment.year
