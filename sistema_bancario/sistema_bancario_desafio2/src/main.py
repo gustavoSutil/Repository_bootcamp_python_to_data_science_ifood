@@ -34,7 +34,10 @@ Menu:
                     MOVIMENTACAO +=f'Valor depositado {valor},\nSaldo atual R$ {SALDO}\n\n'
             case '3' | 'saque':
                 valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
-            
+                if valor >= 0:
+                    print("Valor inválido")
+
+
             case '4' | 'extrato':
                 print(f'\n\n\n\n\n\nMovimentação da conta:\n{MOVIMENTACAO}\n\nSaldo atual: {SALDO:.2f}\n\nLimite: {LIMITE_SAQUE:.2f}\n\n')
                 print(f'Valor sacado {valor},\nSaldo atual R$ {SALDO-valor}')

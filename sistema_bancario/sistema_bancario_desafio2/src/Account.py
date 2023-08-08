@@ -17,37 +17,44 @@ class Account:
         operation = "Saque" if value < 0 else "Depósito" 
         if operation=="Saque":
             self.__draft(value)
+            return 1
         elif operation=="Depósito":
             self.__deposit(value)
+            return 1
+        return 0
     
     def __deposit(self,value):
         #Tratamento de caso , para evitar erros
-        valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
-        if valor <= 0:
-            print("Valor inválido")
+        status = self.moveMoney(self,value)
+        if status:
+            print(f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f}')
+            self.__extract += f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f}\n\n'
+            return 1
         else:
-            SALDO+=float(valor)
-            print(f'Valor depositado {valor},\nSaldo atual R$ {SALDO}')
-            MOVIMENTACAO +=f'Valor depositado {valor},\nSaldo atual R$ {SALDO}\n\n'
-    
+            return 0
+
     def __draft(self,value):
         if  self.__draft_qtd_done_day >= self.__draft_qtd_limit:
             print(f'Valor o limite de saques, LIMITE_SAQUE são {self.__draft_qtd_limit:.2f}')
         else:
-            if value <= 0:
-                print("Valor inválido")
-                return 0
-            elif (self.__account_value<value):
+            if (self.__account_value<value):
                 print('Saldo insuficiente!')
                 return 0
             elif ((value+self.__draft_value_done_day)>self.__draft_value_limit):
                 print(f'Valor acima do limite de saque R$ {self.__draft_value_limit:.2f}')
                 return 0
             else:
-                return 1
-                # make transaction
-                # SALDO-=valor
-                # print(f'Valor sacado {valor},\nSaldo atual R$ {SALDO}')
-                # saques_no_dia+=1
-                # valor_sacado_no_dia+=valor
-                # MOVIMENTACAO += f'Valor sacado {valor},\nSaldo atual R$ {SALDO}\n\n'
+                status = self.moveMoney(self,value)
+                if status:
+                    print(f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f}')
+                    self.__draft_qtd_done_day +=1
+                    self.__draft_value_done_day+=value
+                    self.__extract += f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f}\n\n'
+                    return 1
+                
+    def __moveMoney(self,value) -> int:
+        try:
+            self.__account_value += value
+            return 1
+        except:
+            return 0
