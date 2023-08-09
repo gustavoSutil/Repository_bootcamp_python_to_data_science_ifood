@@ -1,9 +1,9 @@
-from DateController import DateController
+from classes.DateController import DateController
 
 class Account:
     def __init__(self,id: int,*,draft_value_limit : float,draft_qtd_limit : int, initial_value_account : float):
         try:
-            self.__id = id
+            self.id = id
             self.__draft_value_limit = draft_value_limit #float(500)
             self.__draft_qtd_limit =  draft_qtd_limit #int(3)
             self.__account_value = initial_value_account #float('0')
@@ -60,3 +60,6 @@ class Account:
             return 1
         except:
             return 0
+    
+    def getAccountValue(self):
+        return self.__account_value

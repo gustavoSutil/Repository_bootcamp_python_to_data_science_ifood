@@ -4,9 +4,10 @@
 #3 - ter um menu: d / s / e / q  adicional: ajuda
 #4 - cadastro de usuario
 #5 - cadastro de conta bancária
-from DateController import DateController
-from Account import Account
-from User import User
+from classes.DateController import DateController
+from classes.Account import Account
+from classes.User import User
+from tabulate import *
 
 #variavel usada para ver se o dia mudou
 date = DateController.registerMoment()
@@ -21,7 +22,9 @@ def userMain(Users):
         inp = str(input("O que você deseja hoje? "))
         match inp:
             case '1' | 'Entrar':
-                findCPF()
+                SelectedUser  = login(Users)
+                if SelectedUser != None:
+                    selectAccountMain(SelectedUser)
             case '2' | 'Criar usuário':
                 createUser()
             case '3' | 'Listar usuários':
@@ -31,6 +34,31 @@ def userMain(Users):
                 break
             case _:
                 print("Desculpe não entendi\nVocê pode usar a palavra sem letra maiúscula ou o número!")
+
+def selectAccountMain(user: User):
+    checkIfNewDay()
+    print(' Selecione a conta:')
+    listAccountsToPrint = []
+    inp = None
+    for account in user.listAccount:
+        aux = list()    
+        aux.append(account.id)
+        aux.append(account.getAccountValue())
+        listAccountsToPrint.append(aux)
+    while(inp!="0"):
+        print(tabulate(listAccountsToPrint,headers=["id","saldo"]))        
+        print("1 - Criar conta")
+        print("0 - Voltar")
+        inp = str(input("->"))
+        if inp == "0" or "Voltar":
+            return
+        if inp=="1" or inp=="Criar conta":
+            createAccount()
+        for account in user.listAccount:
+            if account.id == inp:
+                return accountMain(account)
+    print("Desculpe não entendi\nVocê pode usar a palavra sem letra maiúscula ou o número!")
+    
 
 def accountMain(conta :Account):
     global date
@@ -89,8 +117,7 @@ def main():
                                 draft_value_limit=500,
                                 initial_value_account=0
                                 ))
-    for account in Users[0].listAccount():
-        print(account)
+    userMain(Users)
     
     
 
@@ -106,30 +133,37 @@ def checkIfNewDay():
         #update
 
 
-def createUser():
-    pass
-def findCPF():
-    pass 
+def login(Users : list):
+    cpf = str(input("Informe o cpf: ").replace(".","").replace("-",""))
+    index = findUserByCPF(Users,cpf)
+    if index==-1:
+        print("CPF não encontrado tente novamente")
+        inp = str(input("1 - Tentar novamente\n2 - Voltar\n"))    
+        if inp=='1' or inp=="Tentar novamente":
+            return login(Users)
+        else:
+            return None
+    else:
+        return Users[index]
+    
+def findUserByCPF(Users : list, cpf : str) -> int:
+    index = -1
+    for user in Users:
+        if user.cpf == cpf:
+            print('\nLoggin realizado!\n\n')
+            return index+1
+        index+=1
+    return -1
+
 def UserListAll():
     pass
 
 
+def createUser():
+    pass
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def createAccount():
+    pass
 
 if __name__ == "__main__":
     main()
