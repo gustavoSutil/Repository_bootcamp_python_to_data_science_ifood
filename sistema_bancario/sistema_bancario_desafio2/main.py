@@ -10,11 +10,10 @@ from classes.User import User
 from tabulate import *
 
 #variavel usada para ver se o dia mudou
-date = DateController.registerMoment()
+date = DateController().registerMoment()
 
 
 def userMain(Users):
-    global date
     inp = '1'
     while(1):
         checkIfNewDay()
@@ -37,35 +36,31 @@ def userMain(Users):
 
 def selectAccountMain(user: User):
     checkIfNewDay()
-    print(' Selecione a conta:')
-    listAccountsToPrint = []
     inp = None
-    for account in user.listAccount:
-        aux = list()    
-        aux.append(account.id)
-        aux.append(account.getAccountValue())
-        listAccountsToPrint.append(aux)
     while(inp!="0"):
-        print(tabulate(listAccountsToPrint,headers=["id","saldo"]))        
-        print("1 - Criar conta")
-        print("0 - Voltar")
-        inp = str(input("->"))
-        if inp == "0" or "Voltar":
+        listAccountsToPrint = []
+        for account in user.listAccount:
+            aux = list()    
+            aux.append(account.id)
+            aux.append(account.getAccountValue())
+            listAccountsToPrint.append(aux)
+        print(' Selecione a conta:\n'+tabulate(listAccountsToPrint,headers=["id","saldo"])+"\n-1 - Criar conta"+"\n-2 - Voltar\n")
+        inp = int(input("->"))
+        if inp == -1:
+            createAccount(user)
+        if inp==-2:
             return
-        if inp=="1" or inp=="Criar conta":
-            createAccount()
         for account in user.listAccount:
             if account.id == inp:
                 return accountMain(account)
     print("Desculpe não entendi\nVocê pode usar a palavra sem letra maiúscula ou o número!")
     
 
-def accountMain(conta :Account):
-    global date
+def accountMain(account :Account):
     inp = '1'
     while(1):
-        checkIfNewDay()
-        print(''' Menu:\n1 - Depósito\n2 - Saque\n3 - Extrato\n4 - Sair\n\n Para navegar bastar digitar a palavra com letra maiúscula ou o numero respctivo''')
+        checkIfNewDay(account=account)
+        print(''' Menu:\n1 - Depósito\n2 - Saque\n3 - Extrato\n4 - Voltar\n\n Para navegar bastar digitar a palavra com letra maiúscula ou o numero respctivo''')
         inp = str(input("O que você deseja hoje? "))
         match inp:
             case '1' | 'Depósito':
@@ -74,21 +69,19 @@ def accountMain(conta :Account):
                 if valor <= 0:
                     print("Valor inválido")
                 else:
-                    SALDO+=float(valor)
-                    print(f'Valor depositado {valor},\nSaldo atual R$ {SALDO}')
-                    MOVIMENTACAO +=f'Valor depositado {valor},\nSaldo atual R$ {SALDO}\n\n'
+                    account.moviment(valor)
             case '2' | 'Saque':
                 valor = float(str(input("Qual o valor?\nR$")).replace(",","."))
-                if valor >= 0:
+                if valor <= 0:
                     print("Valor inválido")
-            
+                else:
+                    account.moviment(valor*-1)
+                
             case '3' | 'Extrato':
-                print(f'\n\n\n\n\n\nMovimentação da conta:\n{MOVIMENTACAO}\n\nSaldo atual: {SALDO:.2f}\n\nLimite: {LIMITE_SAQUE:.2f}\n\n')
-                print(f'Valor sacado {valor},\nSaldo atual R$ {SALDO-valor}')
-            
-            case '4' | 'Sair':
-                exit("Tenha um bom dia!")
-            
+                print(account.showExtract())
+
+            case '4' | 'Voltar':
+                break
             case _:
                 print("Desculpe não entendi\nVocê pode usar a palavra sem letra maiúscula ou o número!")
 
@@ -96,10 +89,9 @@ def accountMain(conta :Account):
 def main():
     #variavel para zerar limite de tranzações no dia (OBS: não estou utilizando nenhum sgbd, caso estivesse seria apenas contar quantas transaçoes e seus respctivos valores para averiguar essa regra de negócio)
     global date
-    date = DateController.registerMoment()
+    date = DateController().registerMoment()
     
     Users = list()
-    Accounts = list()
     
     
     Users.append(User(cpf="12345678912",
@@ -107,12 +99,12 @@ def main():
                       data_nascimento="01/01/2001",
                       endereco="Rua nome,numero,cidade,estado,pais"
                       ))
-    Users[0].addAccount(Account(id=len(Accounts),
+    Users[0].addAccount(Account(id=len(Users[0].listAccount),
                                 draft_qtd_limit=3,
                                 draft_value_limit=500,
                                 initial_value_account=0
                                 ))
-    Users[0].addAccount(Account(id=len(Accounts),
+    Users[0].addAccount(Account(id=len(Users[0].listAccount),
                                 draft_qtd_limit=3,
                                 draft_value_limit=500,
                                 initial_value_account=0
@@ -125,12 +117,12 @@ def main():
 
 #regras de negócio
 
-def checkIfNewDay():
+def checkIfNewDay(user:User = None, account : Account = None):
     global date
-    now = DateController.registerMoment()
+    now = DateController().registerMoment()
     if date.day!=now.day:
-        date = DateController.registerMoment()
-        #update
+        date = DateController().registerMoment()
+        
 
 
 def login(Users : list):
@@ -155,6 +147,16 @@ def findUserByCPF(Users : list, cpf : str) -> int:
         index+=1
     return -1
 
+def createAccount(user : User):
+    value = float(str(input("Qual o valor inicial depositado?\nR$")).replace(",","."))
+    user.addAccount(Account(
+        #por padrao
+        id=len(user.listAccount),
+        draft_qtd_limit=3,
+        draft_value_limit=float(500),
+        initial_value_account=value
+    ))
+    
 def UserListAll():
     pass
 
@@ -162,8 +164,6 @@ def UserListAll():
 def createUser():
     pass
 
-def createAccount():
-    pass
 
 if __name__ == "__main__":
     main()
