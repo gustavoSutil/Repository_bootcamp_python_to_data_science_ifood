@@ -9,7 +9,7 @@ class Account:
             self.__account_value = initial_value_account #float('0')
             self.__draft_qtd_done_day = 0
             self.__draft_value_done_day = 0
-            self.__extract = f'''Conta criada em {DateController.formatedDate()[0:-7]}\n'''
+            self.__extract = f'''Conta criada em {DateController().formatedDate()[0:-7]}\n'''
         except RuntimeError:
             print("Erro ao criar conta repita novamente")
 
@@ -23,21 +23,26 @@ class Account:
             return 1
         return 0
     
-    
-    
+    def showExtract(self):
+        red = '\033[31m','\033[0;0m'
+        return f'\n\n{red[0]}Movimentações:{red[1]}\n{self.__extract}\n\
+{red[0]}Seus limites:{red[1]}\n\
+Quantidade limite de saques: {self.__draft_qtd_limit}\n\
+Valor limite de saques: {self.__draft_value_limit}\n\n'
+
     def __deposit(self,value):
         #Tratamento de caso , para evitar erros
-        status = self.moveMoney(self,value)
+        status = self.__moveMoney(value)
         if status:
-            print(f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController.formatedDate()[0:-7]}')
-            self.__extract += f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController.formatedDate()[0:-7]}\n\n'
+            print(f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController().formatedDate()[0:-7]}')
+            self.__extract += f'Valor depositado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController().formatedDate()[0:-7]}\n\n'
             return 1
         else:
             return 0
 
     def __draft(self,value):
         if  self.__draft_qtd_done_day >= self.__draft_qtd_limit:
-            print(f'Valor o limite de saques, são {self.__draft_qtd_limit}, caso dúvidas tente sair para o menu e voltar novamente')
+            print(f'Quantidade limite de saques, são {self.__draft_qtd_limit}, caso dúvidas tente sair para o menu e voltar novamente')
         else:
             if (self.__account_value<value):
                 print('Saldo insuficiente!')
@@ -46,12 +51,12 @@ class Account:
                 print(f'Valor acima do limite de saque R$ {self.__draft_value_limit:.2f},caso dúvidas tente sair para o menu e voltar novamente')
                 return 0
             else:
-                status = self.moveMoney(self,value)
+                status = self.__moveMoney(value)
                 if status:
-                    print(f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController.formatedDate()[0:-7]}')
+                    print(f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController().formatedDate()[0:-7]}')
                     self.__draft_qtd_done_day +=1
                     self.__draft_value_done_day+=value
-                    self.__extract += f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController.formatedDate()[0:-7]}\n\n'
+                    self.__extract += f'Valor sacado {value:.2f},\nSaldo atual R$ {self.__account_value:.2f} em {DateController().formatedDate()[0:-7]}\n\n'
                     return 1
                 
     def __moveMoney(self,value) -> int:
