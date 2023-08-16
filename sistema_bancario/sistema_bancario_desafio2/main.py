@@ -4,6 +4,8 @@
 #3 - ter um menu: d / s / e / q  adicional: ajuda
 #4 - cadastro de usuario
 #5 - cadastro de conta bancária
+import requests
+import asyncio
 from classes.DateController import DateController
 from classes.Account import Account
 from classes.User import User
@@ -25,9 +27,9 @@ def userMain(Users):
                 if SelectedUser != None:
                     selectAccountMain(SelectedUser)
             case '2' | 'Criar usuário':
-                createUser()
+                createUser(Users)
             case '3' | 'Listar usuários':
-                UserListAll()
+                UserListAll(Users)
             case '4' | 'Sair:':
                 print("Tenha um bom dia!")
                 break
@@ -156,14 +158,25 @@ def createAccount(user : User):
         draft_value_limit=float(500),
         initial_value_account=value
     ))
+
+
+
+
+def createUser(Users: list):
+    response  = requests.get('https://viacep.com.br/ws/01001000/json/')
+    a = response.json()
+    print(a['cep'])
     
-def UserListAll():
+    
+    # for User in Users:
+    
+    #         self.cpf = cpf #unique
+    #     self.nome = nome
+    #     self.data_nascimento = data_nascimento
+    #     self.endereco = endereco    
+    
+def UserListAll(Users: list):
     pass
-
-
-def createUser():
-    pass
-
 
 if __name__ == "__main__":
     main()
