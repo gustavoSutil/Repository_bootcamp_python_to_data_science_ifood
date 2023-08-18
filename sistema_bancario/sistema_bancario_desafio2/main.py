@@ -5,7 +5,6 @@
 #4 - cadastro de usuario
 #5 - cadastro de conta bancária
 import requests
-import asyncio
 from classes.DateController import DateController
 from classes.Account import Account
 from classes.User import User
@@ -99,7 +98,7 @@ def main():
     Users.append(User(cpf="12345678912",
                       nome="Admin",
                       data_nascimento="01/01/2001",
-                      endereco="Rua nome,numero,cidade,estado,pais"
+                      endereco=get_cep_request()
                       ))
     Users[0].addAccount(Account(id=len(Users[0].listAccount),
                                 draft_qtd_limit=3,
@@ -160,23 +159,81 @@ def createAccount(user : User):
     ))
 
 
+def get_cep_request():
+    try:
+        cep_inp = str(input("0 - Voltar\nQual seu cep?\n")).replace("-","")
+        if cep_inp == "0":
+            return
+        response  = requests.get(f'https://viacep.com.br/ws/{cep_inp}/json/')
+        data = response.json()
+        if response.status_code == 200:
+            if len(data) <= 2:
+                print("erro tente novamente!") 
+                return get_cep_request()
+            else:
+                data["numero"] = str(input("Qual o numero da redência?"))
+                print("endereco : " , data)
+                return data
+        else:
+            print("erro tente novamente!") 
+            return get_cep_request()   
+    except:
+        print("erro tente novamente!") 
+        return get_cep_request()
+
+def validar_cpf(cpf:str) -> bool:
+    if len(cpf) != 11:
+        return 0
+    if cpf == cpf[0] * 11:
+        return 0
+    soma = 0
+    for i in range(9):
+        soma += int(cpf[i]) * (10 - i)
+    resto = soma % 11
+    digito1 = 0 if resto < 2 else 11 - resto
+    if digito1 != int(cpf[9]):
+        return 0
+    soma = 0
+    for i in range(10):
+        soma += int(cpf[i]) * (11 - i)
+    resto = soma % 11
+    digito2 = 0 if resto < 2 else 11 - resto
+    if digito2 != int(cpf[10]):
+        return 0
+    return 1
 
 
 def createUser(Users: list):
-    response  = requests.get('https://viacep.com.br/ws/01001000/json/')
-    a = response.json()
-    print(a['cep'])
-    
-    
-    # for User in Users:
-    
-    #         self.cpf = cpf #unique
-    #     self.nome = nome
-    #     self.data_nascimento = data_nascimento
-    #     self.endereco = endereco    
+    while True:
+        cpf = str(input("Qual seu cpf?\n"))
+        cpf = "".join(filter(str.isdigit, cpf))
+        if validar_cpf(cpf):
+            print("cpf aceito!")
+            break
+        else:
+            if input("CPF inválido:\n1 - Tentar novamente\n2 - Voltar\n") == 2:
+                return
+    nome = str(input("Qual seu nome?\n"))
+    nascimento = str(input("Qual a data de seu nascimento? em dd/mm/aaaa\n"))
+    Users.append(User(cpf=cpf,
+                      nome=nome,
+                      data_nascimento=nascimento,
+                      endereco= get_cep_request()
+                      ))
     
 def UserListAll(Users: list):
-    pass
-
+    for user in Users:
+        print(f'CPF: {user.cpf}')
+        print(f'Nome: {user.nome}')
+        print(f'Data Nascimento: {user.data_nascimento}')
+        print('Endereco: ')
+        for item in user.endereco:
+            print(f'    {item}:{user.endereco[item]}')
+        print('Contas: ')
+        aux = []
+        for account in user.listAccount:
+            aux.append([account.id,account.getAccountValue()])
+        print(tabulate(aux,headers=["id","saldo"]))
+    input('\nPress ENTER to continue')
 if __name__ == "__main__":
     main()
